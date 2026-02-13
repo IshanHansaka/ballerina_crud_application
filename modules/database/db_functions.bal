@@ -1,22 +1,29 @@
 import ballerina/sql;
 
-public isolated function getAllBooks() returns Book[]|sql:Error {
+public isolated function getAllBooks() returns Book[]|error {
+    stream<Book, error?> bookStream = dbClient->query(getAllBooksQuery());
 
-    stream<Book, sql:Error?> resultStream = dbClient->query(getAllBooksQuery());
-
-    return check from Book book in resultStream
+    Book[] books = check from var book in bookStream
         select book;
+
+    return books;
 }
 
-public isolated function getBookById(int id) returns Book|sql:Error {
-    return dbClient->queryRow(getBookByIdQuery(id));
+public isolated function getBookById(int id) returns Book|error? {
+    Book|sql:Error book = dbClient->queryRow(getBookByIdQuery(id));
+
+    if book is sql:Error && book is sql:NoRowsError {
+        return;
+    }
+
+    return book;
 }
 
 public isolated function insertBook(BookCreate payload) returns sql:ExecutionResult|sql:Error {
     return dbClient->execute(insertBookQuery(payload));
 }
 
-public isolated function deleteBook(int bookId) returns sql:ExecutionResult|sql:Error {
+public isolated function deleteBook(int bookId) returns sql:ExecutionResult|error {
     return dbClient->execute(deleteBookQuery(bookId));
 }
 

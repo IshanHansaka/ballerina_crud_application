@@ -1,6 +1,7 @@
 import ballerina_crud_application.database;
 
 import ballerina/http;
+import ballerina/log;
 import ballerina/sql;
 
 service / on new http:Listener(9090) {
@@ -8,29 +9,49 @@ service / on new http:Listener(9090) {
     // Resource function to get all books.
     resource function get books() returns database:Book[]|http:InternalServerError {
 
-        database:Book[]|error response = database:getAllBooks();
+        database:Book[]|error books = database:getAllBooks();
 
-        if response is error {
+        if books is error {
+            string customError = string `DB Connection Failed`;
+            log:printError(customError);
             return <http:InternalServerError>{
-                body: "Error while retrieving books"
+                body: {
+                    message: customError
+                }
+            };
+        }
+
+        return books;
+    }
+
+    // Resource function to book by id.
+    resource function get books/[int id]() returns database:Book|http:NotFound|http:InternalServerError {
+        database:Book|error? response = database:getBookById(id);
+
+        // Handle : database read error.
+        if response is error {
+            string customError = string `Error occurred while retrieving book data!`;
+            log:printError(customError, response);
+            return <http:InternalServerError>{
+                body: {
+                    message: customError
+                }
+            };
+        }
+
+        // Handle : not found error.
+        if response is () {
+            string customError = string `Book not found for ID: ${id}`;
+            log:printError(customError);
+            return <http:NotFound>{
+                body: {
+                    message: customError
+                }
             };
         }
 
         return response;
-    }
 
-    resource function get books/[int id]() returns database:Book|http:NotFound|http:InternalServerError {
-        database:Book|error response = database:getBookById(id);
-
-        if response is database:Book {
-            return response;
-        }
-
-        if response is sql:NoRowsError {
-            return http:NOT_FOUND;
-        }
-
-        return http:INTERNAL_SERVER_ERROR;
     }
 
     // Resource function to add new book.
@@ -44,19 +65,29 @@ service / on new http:Listener(9090) {
         return http:CREATED;
     }
 
-    resource function delete books/[int id]() returns http:NoContent|http:InternalServerError {
-        sql:ExecutionResult|sql:Error response = database:deleteBook(id);
+    resource function delete books/[int id]() returns http:NoContent|http:NotFound|http:InternalServerError {
+        sql:ExecutionResult|error? response = database:deleteBook(id);
 
         if response is error {
+            string customError = string `Error while deleting book`;
+            log:printError(customError);
             return <http:InternalServerError>{
-                body: "Error while deleting book"
+                body: customError
+            };
+        }
+
+        if response?.affectedRowCount == 0 {
+            string customError = string `Book with ID ${id} not found`;
+            log:printError(customError);
+            return <http:NotFound>{
+                body: customError
             };
         }
 
         return http:NO_CONTENT;
     }
 
-    resource function patch books/[int id](database:BookUpdate book) returns http:NoContent|http:InternalServerError {
+    resource function patch books/[int id](database:BookUpdate book) returns http:NoContent|http:NotFound|http:InternalServerError {
         sql:ExecutionResult|sql:Error response = database:updateBook(id, book);
 
         if response is error {
