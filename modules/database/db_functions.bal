@@ -1,8 +1,8 @@
 import ballerina/sql;
 
-public isolated function getBooks() returns Book[]|sql:Error {
+public isolated function getAllBooks() returns Book[]|sql:Error {
 
-    stream<Book, sql:Error?> resultStream = dbClient->query(getBooksQuery());
+    stream<Book, sql:Error?> resultStream = dbClient->query(getAllBooksQuery());
 
     return check from Book book in resultStream
         select book;

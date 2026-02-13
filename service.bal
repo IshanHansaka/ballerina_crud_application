@@ -8,7 +8,7 @@ service / on new http:Listener(9090) {
     // Resource function to get all books.
     resource function get books() returns database:Book[]|http:InternalServerError {
 
-        database:Book[]|error response = database:getBooks();
+        database:Book[]|error response = database:getAllBooks();
 
         if response is error {
             return <http:InternalServerError>{

@@ -1,6 +1,6 @@
 import ballerina/sql;
 
-isolated function getBooksQuery() returns sql:ParameterizedQuery => `
+isolated function getAllBooksQuery() returns sql:ParameterizedQuery => `
     SELECT
             id,
             title,
