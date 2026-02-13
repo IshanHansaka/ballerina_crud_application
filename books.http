@@ -1,30 +1,13 @@
 GET http://localhost:9090/books
-
-HTTP/1.1 200  - OK
-content-type: application/json
-connection: close
-server: ballerina
-date: Thu, 12 Feb 2026 16:06:59 +0530
-content-encoding: gzip
-content-length: 175
 ###
-DELETE http://localhost:9090/books/2
-
-HTTP/1.1 204  - No Content
-connection: close
-server: ballerina
-date: Thu, 12 Feb 2026 16:10:56 +0530
+GET http://localhost:9090/books/4
 ###
 PATCH http://localhost:9090/books/3
 Content-Type: application/json
+
 {
     "title": "Change title"
 }
-
-HTTP/1.1 204  - No Content
-connection: close
-server: ballerina
-date: Thu, 12 Feb 2026 16:10:59 +0530
 ###
 POST http://localhost:9090/books
 Content-Type: application/json
@@ -37,9 +20,5 @@ Content-Type: application/json
     "price": 10.99,
     "quantity": 20
 }
-
-HTTP/1.1 201  - Created
-content-length: 0
-connection: close
-server: ballerina
-date: Thu, 12 Feb 2026 16:05:29 +0530
+###
+DELETE http://localhost:9090/books/7

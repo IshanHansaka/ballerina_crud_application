@@ -1,12 +1,15 @@
 import ballerina/sql;
 
-// Define the function to fetch books from the database.
 public isolated function getBooks() returns Book[]|sql:Error {
 
-    // Execute the query and return a stream of Book records.
     stream<Book, sql:Error?> resultStream = dbClient->query(getBooksQuery());
 
-    return check from Book book in resultStream select book;
+    return check from Book book in resultStream
+        select book;
+}
+
+public isolated function getBookById(int id) returns Book|sql:Error {
+    return dbClient->queryRow(getBookByIdQuery(id));
 }
 
 public isolated function insertBook(BookCreate payload) returns sql:ExecutionResult|sql:Error {

@@ -7,18 +7,30 @@ service / on new http:Listener(9090) {
 
     // Resource function to get all books.
     resource function get books() returns database:Book[]|http:InternalServerError {
-        // Call the getBooks function to fetch data from the database.
+
         database:Book[]|error response = database:getBooks();
 
-        // If there's an error while fetching, return an internal server error.
         if response is error {
             return <http:InternalServerError>{
                 body: "Error while retrieving books"
             };
         }
 
-        // Return the response containing the list of books.
         return response;
+    }
+
+    resource function get books/[int id]() returns database:Book|http:NotFound|http:InternalServerError {
+        database:Book|error response = database:getBookById(id);
+
+        if response is database:Book {
+            return response;
+        }
+
+        if response is sql:NoRowsError {
+            return http:NOT_FOUND;
+        }
+
+        return http:INTERNAL_SERVER_ERROR;
     }
 
     // Resource function to add new book.

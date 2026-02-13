@@ -1,7 +1,20 @@
 import ballerina/sql;
 
 isolated function getBooksQuery() returns sql:ParameterizedQuery => `
-SELECT
+    SELECT
+            id,
+            title,
+            author,
+            published_year,
+            genre,
+            price,
+            quantity
+        FROM
+            book;
+`;
+
+isolated function getBookByIdQuery(int id) returns sql:ParameterizedQuery => `
+    SELECT
         id,
         title,
         author,
@@ -10,7 +23,9 @@ SELECT
         price,
         quantity
     FROM
-        book;
+        book
+    WHERE
+        id = ${id}
 `;
 
 isolated function insertBookQuery(BookCreate payload) returns sql:ParameterizedQuery => `
